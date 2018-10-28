@@ -2,6 +2,8 @@ package com.falcon.balav.eatmonster;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
@@ -11,6 +13,8 @@ public class MainActivity extends AppCompatActivity {
     // Remove the below line after defining your own ad unit ID.
     private static final String TOAST_TEXT = "Test ads are being shown. "
             + "To show live ads, replace the ad unit ID in res/values/strings.xml with your own ad unit ID.";
+    private static final String TAG = MainActivity.class.toString();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
