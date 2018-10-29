@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView (R.id.tvCurrentLevel) TextView tvCurrentLevel;
     @BindView (R.id.tvNextLevel)    TextView tvNextLevel;
     @BindView (R.id.imageFood)    ImageView ivFood;
+    @BindView (R.id.imageMore) ImageView ivMore;
+    @BindView (R.id.imageSettings) ImageView ivSettings;
 
     int foodTapCounter=0;
     int coins=0;
@@ -72,6 +74,10 @@ public class MainActivity extends AppCompatActivity {
         score++;
     }
 
+    @OnClick({R.id.imageMore,R.id.imageSettings})
+    public  void actionsTapped(View view){
+        Log.v(TAG,"[actionTapped]:"+view.getId ());
+    }
 
     private void UpdateWidget() {
         int[] ids = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName (getApplication(), HomeScreenWidgetProvider.class));

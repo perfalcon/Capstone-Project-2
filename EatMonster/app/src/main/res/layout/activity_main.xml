@@ -15,8 +15,8 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginStart="0dp"
         app:adSize="BANNER"
         app:adUnitId="@string/banner_ad_unit_id"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -121,30 +121,43 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
+        <View
+            android:id="@+id/vwV3"
+            style="@style/VerticalDivider"
+            android:layout_width="1dp"
+            android:layout_height="30dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageMore"
+            app:layout_constraintStart_toEndOf="@+id/tvNextLevel"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/imageSettings"
+            android:layout_width="36dp"
+            android:layout_height="34dp"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="16dp"
             android:contentDescription="@string/cdSettings"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView3"
+            app:layout_constraintTop_toBottomOf="@+id/imageMore"
             app:layout_constraintVertical_bias="1.0"
-            app:srcCompat="@android:drawable/ic_menu_set_as" />
+            android:src="@drawable/sharp_settings_24" />
 
         <ImageView
-            android:id="@+id/imageView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/imageMore"
+            android:layout_width="36dp"
+            android:layout_height="34dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="0dp"
             android:contentDescription="@string/cdOptions"
+            android:src="@drawable/sharp_more_vert_24"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@android:drawable/ic_menu_sort_by_size" />
+            />
 
 
     </android.support.constraint.ConstraintLayout>
