@@ -41,9 +41,12 @@ dependencies {
     implementation "com.google.android.gms:play-services-games:16.0.0"
     implementation "com.google.android.gms:play-services-auth:16.0.1"
 
-   /* implementation 'com.android.support:animated-vector-drawable:28.0.0'
+    implementation 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+
+    implementation 'com.android.support:animated-vector-drawable:28.0.0'
     implementation 'com.android.support:customtabs:28.0.0'
-    implementation 'com.android.support:support-media-compat:28.0.0'*/
+    implementation 'com.android.support:support-media-compat:28.0.0'
 
 }
 
