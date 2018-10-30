@@ -2,12 +2,20 @@ package com.falcon.balav.eatmonster;
 
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.Toolbar.LayoutParams;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,10 +42,14 @@ public class MainActivity extends AppCompatActivity {
     @BindView (R.id.imageFood)    ImageView ivFood;
     @BindView (R.id.imageMore) ImageView ivMore;
     @BindView (R.id.imageSettings) ImageView ivSettings;
+    PopupWindow popupWindow;
+    ConstraintLayout constraintLayout;
 
     int foodTapCounter=0;
     int coins=0;
     int score=0;
+    boolean bOptionsScreen=false;
+    boolean bSettingsScreen=false;
 
 
     @Override
@@ -59,24 +71,61 @@ public class MainActivity extends AppCompatActivity {
         Log.v(TAG,"Food Tapped, foodTapCounter-->"+foodTapCounter);
         if(foodTapCounter>3){
             foodTapCounter=0;
-            incrementScore();
+            incrementCoins ();
         }
         else{
             foodTapCounter++;
         }
+        incrementScore ();
     }
     private void incrementCoins() {
         Log.v(TAG,"[incrementCoins]:"+coins);
         coins++;
+        tvCoins.setText ("Coins: "+String.valueOf (coins));
     }
     private void incrementScore(){
         Log.v(TAG,"[incrementScore]:"+score);
         score++;
+        tvScore.setText ("Score: "+String.valueOf (score));
     }
 
     @OnClick({R.id.imageMore,R.id.imageSettings})
     public  void actionsTapped(View view){
         Log.v(TAG,"[actionTapped]:"+view.getId ());
+        switch (view.getId ()){
+            case R.id.imageMore:
+                if(bOptionsScreen){
+                    popupWindow.dismiss ();
+                    bOptionsScreen=false;
+                }else{
+                    constraintLayout = (ConstraintLayout) findViewById(R.id.cstlTop);
+                    LayoutInflater layoutInflater1 = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    View customView1 = layoutInflater1.inflate(R.layout.activity_options,null);
+                    //instantiate popup window
+                    popupWindow = new PopupWindow (customView1, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                    //display the popup window
+                    // popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 100, -500);
+                    popupWindow.showAtLocation(constraintLayout, Gravity.CLIP_HORIZONTAL, 0, 0);
+                    bOptionsScreen=true;
+                }
+
+                break;
+            case R.id.imageSettings:
+                if(bSettingsScreen){
+                    popupWindow.dismiss ();
+                    bSettingsScreen=false;
+                }else{
+                    constraintLayout = (ConstraintLayout) findViewById(R.id.cstlTop);
+                    LayoutInflater layoutInflater = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    View customView = layoutInflater.inflate(R.layout.activity_settings,null);
+                    //instantiate popup window
+                    popupWindow = new PopupWindow (customView, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                    //display the popup window
+                    popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 100, -500);
+                    bSettingsScreen=true;
+                }
+                break;
+        }
     }
 
     private void UpdateWidget() {

@@ -43,6 +43,9 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/home_screen_widget_provider_info" />
         </receiver>
+
+        <activity android:name=".settings" />
+        <activity android:name=".options"></activity>
     </application>
 
 </manifest>
