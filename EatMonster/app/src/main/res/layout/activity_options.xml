@@ -5,20 +5,90 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".options"
-    android:background="#B0FF57">
+    android:background="@drawable/popup_border" >
+    <!-- android:background="#B0FF57"-->
 
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="154dp"
-        android:layout_height="107dp"
-        android:layout_marginBottom="8dp"
+        android:id="@+id/tv50Coins"
+        style="@style/PopupOptionsTextStyle"
+        android:layout_width="80dp"
+        android:layout_height="24dp"
+
+        android:text="50 Coins"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/vwH1"
+        style="@style/PopupHorizontalDivider"
+        android:layout_width="80dp"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv50Coins" />
+
+
+    <TextView
+        android:id="@+id/tv100Coins"
+        style="@style/PopupOptionsTextStyle"
+        android:layout_width="80dp"
+        android:layout_height="24dp"
+
+        android:text="100 Coins"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vwH1" />
+
+    <View
+        android:id="@+id/vwH2"
+        style="@style/PopupHorizontalDivider"
+        android:layout_width="80dp"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv100Coins" />
+
+    <TextView
+        android:id="@+id/tv150Coins"
+        style="@style/PopupOptionsTextStyle"
+        android:layout_width="80dp"
+        android:layout_height="24dp"
+
+        android:text="150 Coins"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vwH2" />
+
+    <ImageView
+        android:id="@+id/imageView50Coins"
+        android:layout_width="24dp"
+        android:layout_height="20dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Options"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/tv50Coins"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@android:drawable/ic_media_play" />
+    <ImageView
+        android:id="@+id/imageView100Coins"
+        android:layout_width="24dp"
+        android:layout_height="20dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tv100Coins"
+        app:layout_constraintTop_toTopOf="@+id/vwH1"
+        app:srcCompat="@android:drawable/ic_media_play" />
+    <ImageView
+        android:id="@+id/imageView150Coins"
+        android:layout_width="24dp"
+        android:layout_height="20dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tv150Coins"
+        app:layout_constraintTop_toTopOf="@+id/vwH2"
+        app:srcCompat="@android:drawable/ic_media_play" />
 
 </android.support.constraint.ConstraintLayout>

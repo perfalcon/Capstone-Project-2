@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -92,40 +93,55 @@ public class MainActivity extends AppCompatActivity {
     @OnClick({R.id.imageMore,R.id.imageSettings})
     public  void actionsTapped(View view){
         Log.v(TAG,"[actionTapped]:"+view.getId ());
+        constraintLayout = (ConstraintLayout) findViewById(R.id.cstlTop);
+
         switch (view.getId ()){
             case R.id.imageMore:
                 if(bOptionsScreen){
                     popupWindow.dismiss ();
                     bOptionsScreen=false;
+                }else if(bSettingsScreen){
+                    popupWindow.dismiss ();
+                    bSettingsScreen=false;
+                    displayOptions();
                 }else{
-                    constraintLayout = (ConstraintLayout) findViewById(R.id.cstlTop);
-                    LayoutInflater layoutInflater1 = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    View customView1 = layoutInflater1.inflate(R.layout.activity_options,null);
-                    //instantiate popup window
-                    popupWindow = new PopupWindow (customView1, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-                    //display the popup window
-                    // popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 100, -500);
-                    popupWindow.showAtLocation(constraintLayout, Gravity.CLIP_HORIZONTAL, 0, 0);
-                    bOptionsScreen=true;
+                    displayOptions();
                 }
+
 
                 break;
             case R.id.imageSettings:
                 if(bSettingsScreen){
                     popupWindow.dismiss ();
                     bSettingsScreen=false;
+                }else if(bOptionsScreen){
+                    popupWindow.dismiss ();
+                    bOptionsScreen=false;
+                    displaySettings();
                 }else{
-                    constraintLayout = (ConstraintLayout) findViewById(R.id.cstlTop);
-                    LayoutInflater layoutInflater = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    View customView = layoutInflater.inflate(R.layout.activity_settings,null);
-                    //instantiate popup window
-                    popupWindow = new PopupWindow (customView, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-                    //display the popup window
-                    popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 100, -500);
-                    bSettingsScreen=true;
+                    displaySettings();
                 }
                 break;
         }
+    }
+    private void displaySettings(){
+        LayoutInflater layoutInflaterSettings = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View viewSettings = layoutInflaterSettings.inflate(R.layout.activity_settings,null);
+        //instantiate popup window
+        popupWindow = new PopupWindow (viewSettings, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        //display the popup window
+        popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 50, -550);
+        bSettingsScreen=true;
+    }
+    private void displayOptions(){
+        LayoutInflater layoutInflaterOptions = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View viewOptions = layoutInflaterOptions.inflate(R.layout.activity_options,null);
+        //instantiate popup window
+        popupWindow = new PopupWindow (viewOptions, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        //display the popup window
+        // popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 100, -500);
+        popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 50, -550);
+        bOptionsScreen=true;
     }
 
     private void UpdateWidget() {

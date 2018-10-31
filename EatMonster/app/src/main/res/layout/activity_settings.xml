@@ -5,18 +5,63 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".settings"
-    android:background="#B0FF57">
+    android:background="@drawable/popup_border"
+
+    >
 
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="154dp"
-        android:layout_height="107dp"
-        android:layout_marginBottom="8dp"
+        android:id="@+id/tvSkins"
+        style="@style/PopupTextStyle"
+        android:layout_width="135dp"
+        android:layout_height="27dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="TextView"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Skin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vwH1" />
+
+
+    <TextView
+        android:id="@+id/tvNoAds"
+        style="@style/PopupTextStyle"
+        android:layout_width="135dp"
+        android:layout_height="25dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="No Ads"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/vwH2" />
+
+    <View
+        android:id="@+id/vwH2"
+        style="@style/PopupHorizontalDivider"
+        android:layout_width="135dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvSkins" />
+
+    <View
+        android:id="@+id/vwH1"
+        style="@style/PopupHorizontalDivider"
+        android:layout_width="135dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/switchSaveScore" />
+
+    <Switch
+        android:id="@+id/switchSaveScore"
+        style="@style/PopupTextStyle"
+        android:layout_width="135dp"
+        android:layout_height="22dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="Save Score"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
