@@ -147,7 +147,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageMore"
             app:layout_constraintVertical_bias="1.0"
-            android:src="@drawable/sharp_settings_24" />
+            android:src="@drawable/ic_action_settings" />
+
 
         <ImageView
             android:id="@+id/imageMore"
@@ -155,7 +156,7 @@
             android:layout_height="34dp"
             android:layout_marginEnd="16dp"
             android:contentDescription="@string/cdOptions"
-            android:src="@drawable/sharp_more_vert_24"
+            android:src="@drawable/ic_action_menu"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             />

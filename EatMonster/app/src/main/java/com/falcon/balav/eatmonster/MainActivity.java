@@ -22,6 +22,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardItem;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
+import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 
 import org.w3c.dom.Text;
 
@@ -30,7 +34,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnTouch;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements RewardedVideoAdListener {
     // Remove the below line after defining your own ad unit ID.
     private static final String TOAST_TEXT = "Test ads are being shown. "
             + "To show live ads, replace the ad unit ID in res/values/strings.xml with your own ad unit ID.";
@@ -43,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView (R.id.imageFood)    ImageView ivFood;
     @BindView (R.id.imageMore) ImageView ivMore;
     @BindView (R.id.imageSettings) ImageView ivSettings;
+    ImageView iv50Coins;
+    ImageView iv100Coins;
+    ImageView iv150Coins;
     PopupWindow popupWindow;
     ConstraintLayout constraintLayout;
 
@@ -52,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
     boolean bOptionsScreen=false;
     boolean bSettingsScreen=false;
 
+    private static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
+    private static final String APP_ID = "ca-app-pub-3940256099942544~3347511713";
+    private RewardedVideoAd mRewardedVideoAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +77,13 @@ public class MainActivity extends AppCompatActivity {
         // Toasts the test ad message on the screen. Remove this after defining your own ad unit ID.
         Toast.makeText (this, TOAST_TEXT, Toast.LENGTH_LONG).show ();
       //  @OnTouch({R.id.imageFood})
+
+        Log.v(TAG, "Before Ads");
+        MobileAds.initialize(this, APP_ID);
+        // Use an activity context to get the rewarded video instance.
+        mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
+        mRewardedVideoAd.setRewardedVideoAdListener(this);
+        loadRewardedVideoAd();
     }
     @OnClick(R.id.imageFood)
     public void foodTapped(View view){
@@ -82,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     private void incrementCoins() {
         Log.v(TAG,"[incrementCoins]:"+coins);
         coins++;
-        tvCoins.setText ("Coins: "+String.valueOf (coins));
+        updateCoins (coins);
     }
     private void incrementScore(){
         Log.v(TAG,"[incrementScore]:"+score);
@@ -136,17 +154,106 @@ public class MainActivity extends AppCompatActivity {
     private void displayOptions(){
         LayoutInflater layoutInflaterOptions = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View viewOptions = layoutInflaterOptions.inflate(R.layout.activity_options,null);
-        //instantiate popup window
         popupWindow = new PopupWindow (viewOptions, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        //display the popup window
-        // popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 100, -500);
         popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 50, -550);
         bOptionsScreen=true;
+        iv50Coins = (ImageView)viewOptions.findViewById (R.id.imageView50Coins);
+        iv100Coins = (ImageView)viewOptions.findViewById (R.id.imageView100Coins);
+        iv150Coins = (ImageView)viewOptions.findViewById (R.id.imageView150Coins);
+        iv50Coins.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(TAG,"[onClick-50 coins clicked]:"+v.getId ());
+                showRewardedVideo();
+            }
+        });
+        iv100Coins.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(TAG,"[onClick-100 coins clicked]:"+v.getId ());
+                showRewardedVideo();
+            }
+        });
+        iv150Coins.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.v(TAG,"[onClick-150 coins clicked]:"+v.getId ());
+                showRewardedVideo();
+            }
+        });
     }
 
+
+    private void showRewardedVideo() {
+       // showVideoButton.setVisibility(View.INVISIBLE);
+        if (mRewardedVideoAd.isLoaded()) {
+            mRewardedVideoAd.show();
+        }
+    }
+
+    private void addCoins(int rewardCoins) {
+        coins += rewardCoins;
+        updateCoins (coins);
+    }
+    private void updateCoins(int coins)
+    {
+        tvCoins.setText ("Coins: "+String.valueOf (coins));
+    }
     private void UpdateWidget() {
         int[] ids = AppWidgetManager.getInstance(getApplication()).getAppWidgetIds(new ComponentName (getApplication(), HomeScreenWidgetProvider.class));
         HomeScreenWidgetProvider myWidget = new HomeScreenWidgetProvider ();
         myWidget.onUpdate(this, AppWidgetManager.getInstance(this),ids);
+    }
+
+    private void loadRewardedVideoAd() {
+        if (!mRewardedVideoAd.isLoaded()) {
+            mRewardedVideoAd.loadAd(AD_UNIT_ID,
+                    new AdRequest.Builder().build());
+        }
+
+    }
+
+    @Override
+    public void onRewardedVideoAdLoaded() {
+        Log.v(TAG,"Ad Loaded");
+    }
+
+    @Override
+    public void onRewardedVideoAdOpened() {
+        Log.v(TAG,"Ad opened");
+    }
+
+    @Override
+    public void onRewardedVideoStarted() {
+        Log.v(TAG,"Ad started");
+    }
+
+    @Override
+    public void onRewardedVideoAdClosed() {
+        Log.v(TAG,"Ad closed");
+        loadRewardedVideoAd();
+    }
+
+    @Override
+    public void onRewarded(RewardItem rewardItem) {
+        Log.v(TAG,"Ad - Reward Item"+rewardItem.getAmount ());
+        Log.v(TAG, "Ad- Reward -- Reward Type -->"+rewardItem.getType());
+        addCoins(rewardItem.getAmount ());
+
+    }
+
+    @Override
+    public void onRewardedVideoAdLeftApplication() {
+        Log.v(TAG,"Ad left");
+    }
+
+    @Override
+    public void onRewardedVideoAdFailedToLoad(int i) {
+        Log.v(TAG,"Ad failed loading"+i);
+    }
+
+    @Override
+    public void onRewardedVideoCompleted() {
+        Log.v(TAG,"Ad completed");
     }
 }
