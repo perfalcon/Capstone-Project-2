@@ -4,6 +4,9 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +23,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.falcon.balav.eatmonster.utils.FoodCut;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
@@ -57,12 +61,14 @@ public class MainActivity extends AppCompatActivity
     int foodTapCounter=0;
     int coins=0;
     int score=0;
+    int coinsToAdd=50;
     boolean bOptionsScreen=false;
     boolean bSettingsScreen=false;
 
     private static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
     private static final String APP_ID = "ca-app-pub-3940256099942544~3347511713";
     private RewardedVideoAd mRewardedVideoAd;
+    Bitmap origialBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,19 +90,30 @@ public class MainActivity extends AppCompatActivity
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
         mRewardedVideoAd.setRewardedVideoAdListener(this);
         loadRewardedVideoAd();
+        origialBitmap =  ((BitmapDrawable)ivFood.getDrawable()).getBitmap();
     }
     @OnClick(R.id.imageFood)
     public void foodTapped(View view){
         Log.v(TAG,"Food Tapped, foodTapCounter-->"+foodTapCounter);
-        if(foodTapCounter>3){
+        updateFoodImage(foodTapCounter);
+        if(foodTapCounter>=3){
             foodTapCounter=0;
             incrementCoins ();
+            updateFoodImage (-1);
         }
         else{
             foodTapCounter++;
         }
         incrementScore ();
+
     }
+
+    private void updateFoodImage(int foodTapCounter) {
+        Bitmap newBitmap = FoodCut.EatFood (origialBitmap,foodTapCounter);
+        ivFood.setImageBitmap (newBitmap);
+    }
+
+
     private void incrementCoins() {
         Log.v(TAG,"[incrementCoins]:"+coins);
         coins++;
@@ -105,6 +122,9 @@ public class MainActivity extends AppCompatActivity
     private void incrementScore(){
         Log.v(TAG,"[incrementScore]:"+score);
         score++;
+        updateScore (score);
+    }
+    private void updateScore(int score){
         tvScore.setText ("Score: "+String.valueOf (score));
     }
 
@@ -148,14 +168,14 @@ public class MainActivity extends AppCompatActivity
         //instantiate popup window
         popupWindow = new PopupWindow (viewSettings, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         //display the popup window
-        popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 50, -550);
+        popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 50, -350);
         bSettingsScreen=true;
     }
     private void displayOptions(){
         LayoutInflater layoutInflaterOptions = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View viewOptions = layoutInflaterOptions.inflate(R.layout.activity_options,null);
         popupWindow = new PopupWindow (viewOptions, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 50, -550);
+        popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 50, -350);
         bOptionsScreen=true;
         iv50Coins = (ImageView)viewOptions.findViewById (R.id.imageView50Coins);
         iv100Coins = (ImageView)viewOptions.findViewById (R.id.imageView100Coins);
@@ -165,6 +185,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                 Log.v(TAG,"[onClick-50 coins clicked]:"+v.getId ());
                 showRewardedVideo();
+                coinsToAdd=50;
             }
         });
         iv100Coins.setOnClickListener(new View.OnClickListener() {
@@ -172,6 +193,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                 Log.v(TAG,"[onClick-100 coins clicked]:"+v.getId ());
                 showRewardedVideo();
+                coinsToAdd=100;
             }
         });
         iv150Coins.setOnClickListener(new View.OnClickListener() {
@@ -179,6 +201,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View v) {
                 Log.v(TAG,"[onClick-150 coins clicked]:"+v.getId ());
                 showRewardedVideo();
+                coinsToAdd=150;
             }
         });
     }
@@ -192,7 +215,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void addCoins(int rewardCoins) {
-        coins += rewardCoins;
+        coins += coinsToAdd;
         updateCoins (coins);
     }
     private void updateCoins(int coins)

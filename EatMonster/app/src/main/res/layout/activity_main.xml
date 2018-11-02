@@ -159,6 +159,7 @@
             android:src="@drawable/ic_action_menu"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+
             />
 
 
@@ -174,28 +175,35 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cstlTop">
 
-
         <ImageView
             android:id="@+id/imageFood"
-            android:layout_width="76dp"
-            android:layout_height="144dp"
-            android:layout_marginBottom="100dp"
+            android:layout_width="122dp"
+            android:layout_height="194dp"
+            android:layout_marginBottom="68dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="68dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/cdFoodImage"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/imageFace"
-            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintHorizontal_bias="0.764"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="1.0"
             app:srcCompat="@drawable/vanilla_cone_1" />
 
         <ImageView
             android:id="@+id/imageFace"
-            android:layout_width="137dp"
+            android:layout_width="154dp"
             android:layout_height="202dp"
-            android:layout_marginEnd="60dp"
-            android:layout_marginTop="52dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="100dp"
+            android:layout_marginTop="36dp"
+            android:contentDescription="@string/cdFace"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.263"
             app:srcCompat="@drawable/face" />
     </android.support.constraint.ConstraintLayout>
 
