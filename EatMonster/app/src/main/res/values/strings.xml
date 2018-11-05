@@ -11,5 +11,10 @@
     <string name="add_widget">Add widget</string>
     <string name="cdFoodImage">Current Food Item</string>
     <string name="cdFace">This is a Monster Face</string>
+    <string name="coinsDefaultText">Coins: 0</string>
+    <string name="scoreDefaultText">Score: 0</string>
+    <string name="coinsLabelText">Coins: </string>
+    <string name="scoreLabelText">Label: </string>
+
 
 </resources>

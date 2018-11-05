@@ -19,9 +19,11 @@ public class EatStatusContract {
 
         // Since TaskEntry implements the interface "BaseColumns", it has an automatically produced
         // "_ID" column in addition to the two below
-        public static final  String SCORE="score";
-        public static final  String COINS="coins";
-        public static final  String LEVELID="level_id";
-        public static final  String IMAGE="level_image";
+        public static final String SCORE="score";
+        public static final String COINS="coins";
+        public static final String LEVELID="level_id";
+        public static final String IMAGE="level_image";
+        public static final String SAVESETTINGS="save_settings";
+        public static final String SKIN="skin";
     }
 }

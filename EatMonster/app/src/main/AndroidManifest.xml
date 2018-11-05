@@ -51,6 +51,11 @@
 
         <activity android:name=".settings" />
         <activity android:name=".options"></activity>
+
+        <provider
+            android:authorities="com.falcon.balav.eatmonster"
+            android:name=".data.EatStatusContentProvider"
+            android:exported="true"/>
     </application>
 
 </manifest>

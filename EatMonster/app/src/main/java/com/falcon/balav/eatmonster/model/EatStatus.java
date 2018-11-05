@@ -7,6 +7,16 @@ public class EatStatus implements Parcelable{
     int coins;
     int score;
     Level level;
+    Settings settings;
+
+    public Settings getSettings() {
+        return settings;
+    }
+
+    public void setSettings(Settings settings) {
+        this.settings = settings;
+    }
+
 
     public int getCoins() {
         return coins;
@@ -32,22 +42,47 @@ public class EatStatus implements Parcelable{
         this.level = level;
     }
 
-   
+
+    @Override
+    public String toString() {
+        return "EatStatus{"+
+                "coins="+ coins +
+                ", score="+ score +
+                ", level="+ level+
+                ", settings="+ settings+
+                '}';
+    }
+
     @Override
     public int describeContents() {
         return 0;
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt (this.coins);
+        dest.writeInt (this.score);
+        dest.writeParcelable (this.level, flags);
+        dest.writeParcelable (this.settings,flags);
     }
-    protected EatStatus(Parcel in){
+
+    public EatStatus() {
+    }
+    public void incrementCoins(){
+        coins++;
+    }
+    public void incrementScore(){
+        score++;
+    }
+
+    protected EatStatus(Parcel in) {
         this.coins = in.readInt ();
-        this.score = in.readInt();
-        this.level = (Level)in.readValue (Level.class.getClassLoader ());
-}
-    public static final Parcelable.Creator<EatStatus> CREATOR = new Parcelable.Creator<EatStatus> () {
+        this.score = in.readInt ();
+        this.level = in.readParcelable (Level.class.getClassLoader ());
+        this.settings = in.readParcelable (Settings.class.getClassLoader ());
+    }
+
+    public static final Creator<EatStatus> CREATOR = new Creator<EatStatus> () {
         @Override
         public EatStatus createFromParcel(Parcel source) {
             return new EatStatus (source);
@@ -59,12 +94,5 @@ public class EatStatus implements Parcelable{
         }
     };
 
-    @Override
-    public String toString() {
-        return "EatStatus{"+
-                "coins="+ coins +
-                ", score="+ score +
-                ", level="+ level+
-                '}';
-    }
+
 }
