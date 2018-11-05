@@ -37,6 +37,8 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -87,7 +89,10 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
     Level mLevel;
 
 
-
+    /**
+     * The {@link Tracker} used to record screen views.
+     */
+    private Tracker mTracker;
     private static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
     private static final String APP_ID = "ca-app-pub-3940256099942544~3347511713";
     private RewardedVideoAd mRewardedVideoAd;
@@ -114,6 +119,17 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
         mRewardedVideoAd.setRewardedVideoAdListener(this);
         loadRewardedVideoAd();
+
+
+        // [START tracker]
+        // Obtain the shared Tracker instance.
+        AnalyticsApplication application = (AnalyticsApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+        // Enable Advertising Features.
+        mTracker.enableAdvertisingIdCollection(true);
+        // [END tracker]
+
+
         originalBitmap =  ((BitmapDrawable)ivFood.getDrawable()).getBitmap();
 
         mEatSatus=new EatStatus ();
@@ -123,6 +139,8 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         mEatSatus.setLevel (new Level ());
         getFoodItems (this);
         getDataDatabase(this);
+
+        addAnalyticsTracking("Main");
     }
 
     private void saveDataDatabase( EatStatus mEatStatus){
@@ -330,6 +348,9 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         }
     }
     private void displaySettings(){
+
+        addAnalyticsTracking("SettingsPopup");
+
         LayoutInflater layoutInflaterSettings = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View viewSettings = layoutInflaterSettings.inflate(R.layout.activity_settings,null);
         //instantiate popup window
@@ -349,6 +370,9 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         });
     }
     private void displayOptions(){
+
+        addAnalyticsTracking("OptionsPopup");
+
         LayoutInflater layoutInflaterOptions = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View viewOptions = layoutInflaterOptions.inflate(R.layout.activity_options,null);
         popupWindow = new PopupWindow (viewOptions, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -363,6 +387,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
                 Log.v(TAG,"[onClick-50 coins clicked]:"+v.getId ());
                 showRewardedVideo();
                 coinsToAdd=50;
+                addAnalyticsTrackingHit("50Coins");
             }
         });
         iv100Coins.setOnClickListener(new View.OnClickListener() {
@@ -371,6 +396,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
                 Log.v(TAG,"[onClick-100 coins clicked]:"+v.getId ());
                 showRewardedVideo();
                 coinsToAdd=100;
+                addAnalyticsTrackingHit("100Coins");
             }
         });
         iv150Coins.setOnClickListener(new View.OnClickListener() {
@@ -379,11 +405,25 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
                 Log.v(TAG,"[onClick-150 coins clicked]:"+v.getId ());
                 showRewardedVideo();
                 coinsToAdd=150;
+                addAnalyticsTrackingHit("150Coins");
             }
         });
     }
 
+    private void addAnalyticsTracking(String name){
+        Log.v(TAG, "Screen name: " + name);
+        mTracker.setScreenName("EatMonster~" + name);
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+    }
 
+    private void addAnalyticsTrackingHit(String name){
+        // [START custom_event]
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction(name)
+                .build());
+        // [END custom_event]
+    }
     private void showRewardedVideo() {
        // showVideoButton.setVisibility(View.INVISIBLE);
         if (mRewardedVideoAd.isLoaded()) {
