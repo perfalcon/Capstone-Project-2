@@ -39,6 +39,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
+
 //import com.google.android.gms.analytics.HitBuilders;
 //import com.google.android.gms.analytics.Tracker;
 
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
     /**
      * The {@link //Tracker} used to record screen views.
      */
-  //  private Tracker mTracker;
+  // private Tracker mTracker;
     private static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
     private static final String APP_ID = "ca-app-pub-3940256099942544~3347511713";
     private RewardedVideoAd mRewardedVideoAd;
@@ -147,6 +148,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
     }
 
     private void saveDataDatabase( EatStatus mEatStatus){
+        if(!bDataStatus) return;
         deleteEatStatus ();//delete the current record and add a record with new details ... ( have to remove after the update query is done)
         insertEatStatus (mEatStatus);
     }
@@ -226,6 +228,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
             mSettings.setSaveSettings (saveSettings);
             mEatSatus.setLevel (mLevel);
             mEatSatus.setSettings (mSettings);
+            bDataStatus=saveSettings;
 
             Log.v(TAG,"EatStatus Text -->"+sb.toString ());
         }
@@ -243,22 +246,28 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
     private void checkAndUpdateLevel(){
         //Get the current Level
         for (FoodItems mfoodItem : mFoodItems) {
-            if(mEatSatus.getCoins ()>=mfoodItem.getWeight ()){
+            if(mEatSatus.getCoins ()<mfoodItem.getWeight ()){
+                Log.v(TAG,"[checkAndUpdateLevel]--> Weight matched");
                 mEatSatus.getLevel ().setLevel (mfoodItem.getLevel ());
+                mEatSatus.getLevel ().setFoodItem (mfoodItem.getFoodItem ());
                 ivCurrentLevel.setImageResource (getImageID (mfoodItem.getFoodItem ()));
                 ivFood.setImageResource (getImageID(mfoodItem.getFoodItem ()));
-                mEatSatus.setCoins (0);//Reset the coin count to 0
+
+              /*  mEatSatus.setCoins (mEatSatus.getCoins ()-mfoodItem.getWeight ());//Reset the coin count to 0
                 String strTemp = getString (R.string.coinsDefaultText);
-                tvCoins.setText (strTemp);
+                tvCoins.setText (strTemp);*/
+                //as weight matched --- then find the next level
+                for(FoodItems mfoodItemNextLevel:mFoodItems){
+                    if(mEatSatus.getLevel ().getId ()<mfoodItemNextLevel.getLevel () ){
+                        ivNextLevel.setImageResource (getImageID (mfoodItemNextLevel.getFoodItem ()));
+                        break; //break the loop
+                    }
+                }
                 break;
             }
+            Log.v(TAG,"[checkAndUpdateLevel]--> Weight Not Matched--"+mEatSatus.getCoins ()+"=="+mfoodItem.getWeight ());
         }
-        for(FoodItems mfoodItem:mFoodItems){
-           if(mEatSatus.getLevel ().getId ()<mfoodItem.getLevel () ){
-                ivNextLevel.setImageResource (getImageID (mfoodItem.getFoodItem ()));
-                break; //break the loop
-            }
-        }
+
     }
 
     private void populateDefaultUI(){
@@ -386,6 +395,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
        mSaveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mEatSatus.getSettings ().setSaveSettings (isChecked);
+                bDataStatus=isChecked;
                 saveDataDatabase (mEatSatus);
                }
         });
