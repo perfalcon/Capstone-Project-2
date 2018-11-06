@@ -80,20 +80,29 @@
             app:layout_constraintStart_toEndOf="@+id/tvCoins"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/tvCurrentLevel"
-            style="@style/TextStyle"
-            android:layout_width="65dp"
-            android:layout_height="80dp"
-            android:layout_marginBottom="8dp"
+        <ImageView
+            android:id="@+id/ivCurrentLevel"
+            android:layout_width="50dp"
+            android:layout_height="64dp"
             android:layout_marginStart="8dp"
-            android:fontFamily="@font/roboto"
-            android:text="Current Level "
-            android:textStyle="bold"
+            android:contentDescription="@string/cdFoodImage"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/vwV1"
+            app:layout_constraintStart_toStartOf="@+id/vwV1"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="0.428"
+            app:srcCompat="@drawable/vanilla_cone" />
+
+        <ImageView
+            android:id="@+id/ivNextLevel"
+            android:layout_width="50dp"
+            android:layout_height="64dp"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="@string/cdFoodImage"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/vwV3"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.47"
+            app:srcCompat="@drawable/vanilla_cone" />
 
         <View
             android:id="@+id/vwV2"
@@ -105,23 +114,10 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/tvNextLevel"
-            app:layout_constraintStart_toEndOf="@+id/tvCurrentLevel"
+            app:layout_constraintEnd_toStartOf="@+id/ivNextLevel"
+            app:layout_constraintStart_toEndOf="@+id/ivCurrentLevel"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/tvNextLevel"
-            style="@style/TextStyle"
-            android:layout_width="58dp"
-            android:layout_height="80dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="68dp"
-            android:fontFamily="@font/roboto"
-            android:text="Next Level"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
         <View
             android:id="@+id/vwV3"
             style="@style/VerticalDivider"
@@ -129,11 +125,9 @@
             android:layout_height="30dp"
             android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/imageMore"
-            app:layout_constraintStart_toEndOf="@+id/tvNextLevel"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
@@ -168,12 +162,12 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="417dp"
-        android:layout_marginBottom="0dp"
         app:layout_constraintBottom_toTopOf="@+id/adView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cstlTop">
+        app:layout_constraintTop_toBottomOf="@+id/cstlTop"
+        app:layout_constraintVertical_bias="0.0">
 
         <ImageView
             android:id="@+id/imageFood"
@@ -186,24 +180,24 @@
             android:contentDescription="@string/cdFoodImage"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/imageFace"
-            app:layout_constraintHorizontal_bias="0.764"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1.0"
-            app:srcCompat="@drawable/vanilla_cone_1" />
+            app:srcCompat="@drawable/vanilla_cone" />
 
         <ImageView
             android:id="@+id/imageFace"
             android:layout_width="154dp"
             android:layout_height="202dp"
             android:layout_marginBottom="8dp"
-            android:layout_marginEnd="100dp"
+            android:layout_marginEnd="92dp"
             android:layout_marginTop="36dp"
             android:contentDescription="@string/cdFace"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.263"
+            app:layout_constraintVertical_bias="0.251"
             app:srcCompat="@drawable/face" />
     </android.support.constraint.ConstraintLayout>
 

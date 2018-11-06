@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -23,6 +24,7 @@ import android.widget.PopupWindow;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import com.falcon.balav.eatmonster.data.EatStatusContract;
 import com.falcon.balav.eatmonster.model.EatStatus;
@@ -52,6 +54,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.falcon.balav.eatmonster.data.EatStatusContract.EatStatusEntry.CONTENT_URI;
+import static java.lang.Thread.sleep;
 
 
 public class MainActivity extends AppCompatActivity        implements RewardedVideoAdListener {
@@ -62,8 +65,8 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
 
     @BindView (R.id.tvCoins)    TextView tvCoins;
     @BindView (R.id.tvScore) TextView tvScore;
-    @BindView (R.id.tvCurrentLevel) TextView tvCurrentLevel;
-    @BindView (R.id.tvNextLevel)    TextView tvNextLevel;
+    @BindView (R.id.ivCurrentLevel) ImageView ivCurrentLevel;
+    @BindView (R.id.ivNextLevel) ImageView ivNextLevel;
     @BindView (R.id.imageFood)    ImageView ivFood;
     @BindView (R.id.imageMore) ImageView ivMore;
     @BindView (R.id.imageSettings) ImageView ivSettings;
@@ -140,6 +143,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         getDataDatabase(this);
 
         //addAnalyticsTracking("Main");
+
     }
 
     private void saveDataDatabase( EatStatus mEatStatus){
@@ -232,22 +236,26 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         tvCoins.setText (strTemp );
         strTemp = getString(R.string.scoreLabelText) +" "+ String.valueOf (mEatSatus.getScore ());
         tvScore.setText (strTemp);
-        tvNextLevel.setText(String.valueOf (mEatSatus.getLevel ().getId ()));
-        tvCurrentLevel.setText (String.valueOf (mEatSatus.getLevel ().getId ()));
+        ivNextLevel.setImageResource (getImageID (mEatSatus.getLevel ().getFoodItem ()));
+        ivCurrentLevel.setImageResource (getImageID (mEatSatus.getLevel ().getFoodItem ()));
         checkAndUpdateLevel();
     }
     private void checkAndUpdateLevel(){
         //Get the current Level
         for (FoodItems mfoodItem : mFoodItems) {
-            if(mEatSatus.getCoins ()<=mfoodItem.getWeight ()){
+            if(mEatSatus.getCoins ()>=mfoodItem.getWeight ()){
                 mEatSatus.getLevel ().setLevel (mfoodItem.getLevel ());
-                tvCurrentLevel.setText (String.valueOf (mfoodItem.getLevel ()));
+                ivCurrentLevel.setImageResource (getImageID (mfoodItem.getFoodItem ()));
+                ivFood.setImageResource (getImageID(mfoodItem.getFoodItem ()));
+                mEatSatus.setCoins (0);//Reset the coin count to 0
+                String strTemp = getString (R.string.coinsDefaultText);
+                tvCoins.setText (strTemp);
                 break;
             }
         }
         for(FoodItems mfoodItem:mFoodItems){
            if(mEatSatus.getLevel ().getId ()<mfoodItem.getLevel () ){
-                tvNextLevel.setText (String.valueOf (mfoodItem.getLevel ()));
+                ivNextLevel.setImageResource (getImageID (mfoodItem.getFoodItem ()));
                 break; //break the loop
             }
         }
@@ -258,9 +266,9 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         tvScore.setText (R.string.scoreDefaultText);
         mEatSatus.getLevel ().setLevel (mFoodItems.get (0).getLevel ());
         mEatSatus.getLevel ().setFoodItem (mFoodItems.get (0).getFoodItem ());
-        tvCurrentLevel.setText(mFoodItems.get (0).getFoodItem ());//have to replace with proper image
-        tvNextLevel.setText (mFoodItems.get (1).getFoodItem ());//have to replace with proper image
-        ivFood.setImageResource (R.drawable.vanilla_small_cone);
+        ivCurrentLevel.setImageResource (getImageID (mFoodItems.get (0).getFoodItem ()));
+        ivNextLevel.setImageResource (getImageID (mFoodItems.get (1).getFoodItem ()));
+        ivFood.setImageResource (getImageID (mFoodItems.get (0).getFoodItem ()));
         //mSettings.setSaveSettings (false);
         //mSettings.setSkin ("default");
         mEatSatus.getSettings ().setSkin ("default");
@@ -307,7 +315,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
     }
 
     private void updateFoodImage(int foodTapCounter) {
-        Bitmap newBitmap = FoodCut.EatFood (originalBitmap,foodTapCounter);
+        Bitmap newBitmap = FoodCut.EatFood (((BitmapDrawable)ivFood.getDrawable()).getBitmap(),foodTapCounter);
         ivFood.setImageBitmap (newBitmap);
     }
 
@@ -374,11 +382,9 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 50, -350);
         bSettingsScreen=true;
        mSaveSwitch=(Switch) viewSettings.findViewById (R.id.switchSaveScore);
-      // mSaveSwitch.setChecked (mSettings.isSaveSettings ());
        mSaveSwitch.setChecked (mEatSatus.getSettings ().isSaveSettings ());
        mSaveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                //mSettings.setSaveSettings (isChecked);
                 mEatSatus.getSettings ().setSaveSettings (isChecked);
                 saveDataDatabase (mEatSatus);
                }
@@ -469,7 +475,6 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
             mRewardedVideoAd.loadAd(AD_UNIT_ID,
                     new AdRequest.Builder().build());
         }
-
     }
 
     @Override
@@ -514,5 +519,13 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
     @Override
     public void onRewardedVideoCompleted() {
         Log.v(TAG,"Ad completed");
+    }
+
+
+    private int getImageID(String imageName){
+        Resources res = getResources();
+        int resId=res.getIdentifier ("drawable/"+imageName.substring (0,imageName.lastIndexOf ('.')),"drawable",getPackageName ());
+        Log.v(TAG,"[getImageID]-->"+imageName+"-->"+resId);
+        return resId;
     }
 }

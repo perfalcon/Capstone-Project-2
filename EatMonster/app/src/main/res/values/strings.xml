@@ -14,7 +14,7 @@
     <string name="coinsDefaultText">Coins: 0</string>
     <string name="scoreDefaultText">Score: 0</string>
     <string name="coinsLabelText">Coins: </string>
-    <string name="scoreLabelText">Label: </string>
+    <string name="scoreLabelText">Score: </string>
 
 
 </resources>

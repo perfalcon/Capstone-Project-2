@@ -1,12 +1,12 @@
  [
     {
       "level": 1,
-      "foodItem": "vanilla_small_cone.jpg",
+      "foodItem": "vanilla_cone.jpg",
       "weight": 200
     },
     {
       "level": 2,
-      "foodItem": "vanilla_cone.jpg",
+      "foodItem": "vanilla_small_cone.jpg",
       "weight": 400
     },
     {
