@@ -1,6 +1,5 @@
 package com.falcon.balav.eatmonster;
 
-import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -9,21 +8,19 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar.LayoutParams;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
@@ -31,7 +28,6 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
 
 import com.falcon.balav.eatmonster.data.EatStatusContract;
 import com.falcon.balav.eatmonster.model.EatStatus;
@@ -47,23 +43,20 @@ import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 
-//import com.google.android.gms.analytics.HitBuilders;
-//import com.google.android.gms.analytics.Tracker;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.ListIterator;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static android.graphics.PorterDuff.Mode.DST;
 import static com.falcon.balav.eatmonster.data.EatStatusContract.EatStatusEntry.CONTENT_URI;
-import static java.lang.Thread.sleep;
+
+//import com.google.android.gms.analytics.HitBuilders;
+//import com.google.android.gms.analytics.Tracker;
 
 
 public class MainActivity extends AppCompatActivity        implements RewardedVideoAdListener {
@@ -287,8 +280,6 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         ivCurrentLevel.setImageResource (getImageID (mFoodItems.get (0).getFoodItem ()));
         ivNextLevel.setImageResource (getImageID (mFoodItems.get (1).getFoodItem ()));
         ivFood.setImageResource (getImageID (mFoodItems.get (0).getFoodItem ()));
-        //mSettings.setSaveSettings (false);
-        //mSettings.setSkin ("default");
         mEatSatus.getSettings ().setSkin ("default");
         mEatSatus.getSettings ().setSaveSettings (false);
 
@@ -395,8 +386,8 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         LayoutInflater layoutInflaterSettings = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View viewSettings = layoutInflaterSettings.inflate(R.layout.activity_settings,null);
 
-        GradientDrawable drawable = (GradientDrawable) viewSettings.getResources().getDrawable(R.drawable.popup_border);
-        viewSettings.setBackground(drawable);
+//        GradientDrawable drawable = (GradientDrawable) viewSettings.getResources().getDrawable(R.drawable.popup_border);
+//        viewSettings.setBackground(drawable);
         //instantiate popup window
         popupWindow = new PopupWindow (viewSettings, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         //display the popup window
@@ -407,7 +398,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
             spinner.setOnItemSelectedListener (new AdapterView.OnItemSelectedListener () {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    Toast.makeText (MainActivity.this,adapterView.getSelectedItem ().toString (),Toast.LENGTH_LONG).show ();
+                   // Toast.makeText (MainActivity.this,adapterView.getSelectedItem ().toString (),Toast.LENGTH_LONG).show ();
                     UpdateColors(adapterView.getSelectedItem ().toString ());
                 }
 
@@ -417,10 +408,6 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
                 }
             });
         }
-
-
-
-
         mSaveSwitch=(Switch) viewSettings.findViewById (R.id.switchSaveScore);
         mSaveSwitch.setChecked (mEatSatus.getSettings ().isSaveSettings ());
         mSaveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -443,35 +430,17 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
             mConstraintLayout.setBackgroundColor (ContextCompat.getColor(this,R.color.colorMenu));
         }
         if(themeName.equalsIgnoreCase ("Venus")){
-            Toast.makeText (MainActivity.this,R.string.paidVersionText,Toast.LENGTH_LONG).show ();
-            mConstraintLayout.setBackgroundColor (ContextCompat.getColor(this,R.color.colorVenusMenu));
-          //  setTheme(R.style.VenusTheme);
-            //https://stackoverflow.com/questions/39121349/change-popupwindow-drawable-background-color-dynamically?rq=1
-            /*mConstraintLayout =(ConstraintLayout)findViewById(R.id.cstlOptions);
-            mConstraintLayout.setBackgroundColor  (R.drawable.popup_border_venus);
-            mConstraintLayout =(ConstraintLayout)findViewById(R.id.cstlSettings);
-            mConstraintLayout.setBackgroundColor  (R.drawable.popup_border_venus);*/
-
-
-
-
+            displayPaidVersionToast();
         }
         if(themeName.equalsIgnoreCase ("Mars")){
-            mConstraintLayout.setBackgroundColor (ContextCompat.getColor(this,R.color.colorMarsMenu));
-           // setTheme(R.style.MarsTheme);
-            /*mConstraintLayout =(ConstraintLayout)findViewById(R.id.cstlOptions);
-            mConstraintLayout.setBackgroundColor  (R.drawable.popup_border_mars);
-            mConstraintLayout =(ConstraintLayout)findViewById(R.id.cstlSettings);
-            mConstraintLayout.setBackgroundColor  (R.drawable.popup_border_mars);*/
+            displayPaidVersionToast();
         }
         if(themeName.equalsIgnoreCase ("Earth")){
-            mConstraintLayout.setBackgroundColor (ContextCompat.getColor(this,R.color.colorEarthMenu));
-            /*mConstraintLayout =(ConstraintLayout)findViewById(R.id.cstlOptions);
-            mConstraintLayout.setBackgroundColor  (R.drawable.popup_border_earth);
-            mConstraintLayout =(ConstraintLayout)findViewById(R.id.cstlSettings);
-            mConstraintLayout.setBackgroundColor  (R.drawable.popup_border_earth);*/
-           // setTheme(R.style.EarthTheme);
+            displayPaidVersionToast();
         }
+    }
+    private void displayPaidVersionToast(){
+        Toast.makeText (MainActivity.this,R.string.paidVersionText,Toast.LENGTH_LONG).show ();
     }
     private void displayOptions(){
 
