@@ -1,5 +1,6 @@
 package com.falcon.balav.eatmonster;
 
+import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.ContentValues;
@@ -8,9 +9,12 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar.LayoutParams;
@@ -18,9 +22,12 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,6 +61,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static android.graphics.PorterDuff.Mode.DST;
 import static com.falcon.balav.eatmonster.data.EatStatusContract.EatStatusEntry.CONTENT_URI;
 import static java.lang.Thread.sleep;
 
@@ -71,6 +79,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
     @BindView (R.id.imageFood)    ImageView ivFood;
     @BindView (R.id.imageMore) ImageView ivMore;
     @BindView (R.id.imageSettings) ImageView ivSettings;
+
     ImageView iv50Coins;
     ImageView iv100Coins;
     ImageView iv150Coins;
@@ -385,20 +394,84 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
 
         LayoutInflater layoutInflaterSettings = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View viewSettings = layoutInflaterSettings.inflate(R.layout.activity_settings,null);
+
+        GradientDrawable drawable = (GradientDrawable) viewSettings.getResources().getDrawable(R.drawable.popup_border);
+        viewSettings.setBackground(drawable);
         //instantiate popup window
         popupWindow = new PopupWindow (viewSettings, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         //display the popup window
-        popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 50, -350);
-        bSettingsScreen=true;
-       mSaveSwitch=(Switch) viewSettings.findViewById (R.id.switchSaveScore);
-       mSaveSwitch.setChecked (mEatSatus.getSettings ().isSaveSettings ());
-       mSaveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        if(!( MainActivity.this).isFinishing()){
+            popupWindow.showAtLocation(constraintLayout, Gravity.RIGHT, 50, -350);
+            bSettingsScreen=true;
+            Spinner spinner = (Spinner) viewSettings.findViewById(R.id.spinnerSkin);
+            spinner.setOnItemSelectedListener (new AdapterView.OnItemSelectedListener () {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    Toast.makeText (MainActivity.this,adapterView.getSelectedItem ().toString (),Toast.LENGTH_LONG).show ();
+                    UpdateColors(adapterView.getSelectedItem ().toString ());
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
+        }
+
+
+
+
+        mSaveSwitch=(Switch) viewSettings.findViewById (R.id.switchSaveScore);
+        mSaveSwitch.setChecked (mEatSatus.getSettings ().isSaveSettings ());
+        mSaveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mEatSatus.getSettings ().setSaveSettings (isChecked);
                 bDataStatus=isChecked;
                 saveDataDatabase (mEatSatus);
                }
         });
+    }
+
+    private GradientDrawable getPopupBackground(GradientDrawable drawable){
+       drawable.setColor(ContextCompat.getColor(this,R.color.colorVenusPrimary));
+        return drawable;
+    }
+    private void UpdateColors(String themeName){
+        ConstraintLayout mConstraintLayout =
+                (ConstraintLayout)findViewById(R.id.cstlTop);
+        if(themeName.equalsIgnoreCase ("Default")){
+            mConstraintLayout.setBackgroundColor (ContextCompat.getColor(this,R.color.colorMenu));
+        }
+        if(themeName.equalsIgnoreCase ("Venus")){
+            Toast.makeText (MainActivity.this,R.string.paidVersionText,Toast.LENGTH_LONG).show ();
+            mConstraintLayout.setBackgroundColor (ContextCompat.getColor(this,R.color.colorVenusMenu));
+          //  setTheme(R.style.VenusTheme);
+            //https://stackoverflow.com/questions/39121349/change-popupwindow-drawable-background-color-dynamically?rq=1
+            /*mConstraintLayout =(ConstraintLayout)findViewById(R.id.cstlOptions);
+            mConstraintLayout.setBackgroundColor  (R.drawable.popup_border_venus);
+            mConstraintLayout =(ConstraintLayout)findViewById(R.id.cstlSettings);
+            mConstraintLayout.setBackgroundColor  (R.drawable.popup_border_venus);*/
+
+
+
+
+        }
+        if(themeName.equalsIgnoreCase ("Mars")){
+            mConstraintLayout.setBackgroundColor (ContextCompat.getColor(this,R.color.colorMarsMenu));
+           // setTheme(R.style.MarsTheme);
+            /*mConstraintLayout =(ConstraintLayout)findViewById(R.id.cstlOptions);
+            mConstraintLayout.setBackgroundColor  (R.drawable.popup_border_mars);
+            mConstraintLayout =(ConstraintLayout)findViewById(R.id.cstlSettings);
+            mConstraintLayout.setBackgroundColor  (R.drawable.popup_border_mars);*/
+        }
+        if(themeName.equalsIgnoreCase ("Earth")){
+            mConstraintLayout.setBackgroundColor (ContextCompat.getColor(this,R.color.colorEarthMenu));
+            /*mConstraintLayout =(ConstraintLayout)findViewById(R.id.cstlOptions);
+            mConstraintLayout.setBackgroundColor  (R.drawable.popup_border_earth);
+            mConstraintLayout =(ConstraintLayout)findViewById(R.id.cstlSettings);
+            mConstraintLayout.setBackgroundColor  (R.drawable.popup_border_earth);*/
+           // setTheme(R.style.EarthTheme);
+        }
     }
     private void displayOptions(){
 

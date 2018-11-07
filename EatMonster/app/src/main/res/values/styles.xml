@@ -8,6 +8,26 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="MarsTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <!-- Customize your theme here. -->
+    <item name="colorPrimary">@color/colorMarsPrimary</item>
+    <item name="colorPrimaryDark">@color/colorMarsPrimaryDark</item>
+    <item name="colorAccent">@color/colorMarsAccent</item>
+</style>
+    <style name="VenusTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorVenusPrimary</item>
+        <item name="colorPrimaryDark">@color/colorVenusPrimaryDark</item>
+        <item name="colorAccent">@color/colorVenusAccent</item>
+    </style>
+
+    <style name="EarthTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorEarthPrimary</item>
+        <item name="colorPrimaryDark">@color/colorEarthPrimaryDark</item>
+        <item name="colorAccent">@color/colorEarthAccent</item>
+    </style>
+
     <style name="HorizontalDivider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
