@@ -20,11 +20,33 @@ import static com.falcon.balav.eatmonster.data.EatStatusContract.EatStatusEntry.
  */
 public class HomeScreenWidgetProvider extends AppWidgetProvider {
     private static final String TAG = HomeScreenWidgetProvider.class.toString();
+    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int coins, int score, String foodItem,
+                                int appWidgetId) {
+
+        // Construct the RemoteViews object
+        RemoteViews views = new RemoteViews (context.getPackageName (), R.layout.home_screen_widget_provider);
+
+        views.setTextViewText (R.id.tvCoins,context.getString(R.string.coinsLabelText)+" "+String.valueOf (coins));
+        views.setTextViewText (R.id.tvScore,context.getString (R.string.scoreLabelText)+" "+String.valueOf (score));
+        views.setImageViewResource (R.id.imageView,context.getResources ()
+                .getIdentifier ("drawable/"+foodItem.substring (0,foodItem.lastIndexOf ('.')),"drawable",context.getPackageName ()));
+
+    //    fillEatStatusText(context,views);
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetId);
+        PendingIntent pendingIntent=PendingIntent.getActivity (context,0,intent,0);
+        views.setOnClickPendingIntent (R.id.widgetEatMonster,pendingIntent);
+
+        // Instruct the widget manager to update the widget
+        appWidgetManager.updateAppWidget (appWidgetId, views);
+    }
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews (context.getPackageName (), R.layout.home_screen_widget_provider);
+
         fillEatStatusText(context,views);
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
@@ -36,6 +58,12 @@ public class HomeScreenWidgetProvider extends AppWidgetProvider {
         appWidgetManager.updateAppWidget (appWidgetId, views);
     }
 
+    public static void updatePlantWidgets(Context context, AppWidgetManager appWidgetManager,
+                                          int coins, int score, String foodItem, int[] appWidgetIds) {
+        for (int appWidgetId : appWidgetIds) {
+            updateAppWidget(context, appWidgetManager, coins, score,foodItem, appWidgetId);
+        }
+    }
     private static void fillEatStatusText(Context context, RemoteViews views) {
         StringBuilder sb=new StringBuilder ();
         Uri EATSTATUS_URI = CONTENT_URI;
@@ -71,6 +99,8 @@ public class HomeScreenWidgetProvider extends AppWidgetProvider {
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget (context, appWidgetManager, appWidgetId);
         }
+        Log.v(TAG,"[onUpdate]--called");
+       // HomeScreenWidgetService.startActionUpdateEatStatusWidgets (context);
     }
 
     @Override
