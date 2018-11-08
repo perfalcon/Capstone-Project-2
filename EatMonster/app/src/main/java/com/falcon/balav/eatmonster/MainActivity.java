@@ -12,8 +12,13 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar.LayoutParams;
 import android.util.Log;
@@ -59,11 +64,13 @@ import static com.falcon.balav.eatmonster.data.EatStatusContract.EatStatusEntry.
 //import com.google.android.gms.analytics.Tracker;
 
 
-public class MainActivity extends AppCompatActivity        implements RewardedVideoAdListener {
+public class MainActivity extends AppCompatActivity        implements RewardedVideoAdListener, LoaderManager.LoaderCallbacks<Cursor> {
     // Remove the below line after defining your own ad unit ID.
     private static final String TOAST_TEXT = "Test ads are being shown. "
             + "To show live ads, replace the ad unit ID in res/values/strings.xml with your own ad unit ID.";
     private static final String TAG = MainActivity.class.toString();
+
+    private static final int EATSTATUS_LOADER_ID = 0;
 
     @BindView (R.id.tvCoins)    TextView tvCoins;
     @BindView (R.id.tvScore) TextView tvScore;
@@ -141,10 +148,9 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         mEatSatus.setSettings (new Settings ());
         mEatSatus.setLevel (new Level ());
         getFoodItems (this);
-        getDataDatabase(this);
-
-        //addAnalyticsTracking("Main");
-
+        activateLoader();
+       // getDataDatabase(this);
+        // addAnalyticsTracking("Main");
     }
 
     private void saveDataDatabase( EatStatus mEatStatus){
@@ -176,6 +182,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         Log.v(TAG, "EatStatus-->"+mEatStatus.toString ());
 
         UpdateWidget();
+       // HomeScreenWidgetService.startActionUpdateEatStatusWidgets (this);
     }
 
 
@@ -197,6 +204,28 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
             Log.v(TAG,"Opened for First Time");
             bDataStatus=false;
             populateDefaultUI();
+        }
+    }
+
+    private void getDataFromCursor(Cursor cursor){
+        if(cursor!=null){
+            Log.v (TAG, "count-->" + cursor.getCount ());
+            bDataStatus=true;
+            fillEatStatus(cursor);
+            populateUI ();
+        }else{
+            Log.v(TAG,"Opened for First Time");
+            bDataStatus=false;
+            populateDefaultUI();
+        }
+    }
+    private void activateLoader(){
+        Log.v(TAG,"[activateLoader]");
+        if(getSupportLoaderManager ().hasRunningLoaders ()){
+            getSupportLoaderManager().initLoader(EATSTATUS_LOADER_ID, null, this);
+        }
+        else{
+            getSupportLoaderManager ().restartLoader (EATSTATUS_LOADER_ID, null, this);
         }
     }
 
@@ -380,10 +409,8 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
     private void displaySettings(){
 
        // addAnalyticsTracking("SettingsPopup");
-
         LayoutInflater layoutInflaterSettings = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View viewSettings = layoutInflaterSettings.inflate(R.layout.activity_settings,null);
-
 //        GradientDrawable drawable = (GradientDrawable) viewSettings.getResources().getDrawable(R.drawable.popup_border);
 //        viewSettings.setBackground(drawable);
         //instantiate popup window
@@ -577,5 +604,66 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         int resId=res.getIdentifier ("drawable/"+imageName.substring (0,imageName.lastIndexOf ('.')),"drawable",getPackageName ());
         Log.v(TAG,"[getImageID]-->"+imageName+"-->"+resId);
         return resId;
+    }
+
+    @NonNull
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, @Nullable Bundle bundle) {
+        return  new AsyncTaskLoader<Cursor> (this) {
+
+            // Initialize a Cursor, this will hold all the task data
+            Cursor mEatStatusData = null;
+
+            // onStartLoading() is called when a loader first starts loading data
+            @Override
+            protected void onStartLoading() {
+                if (mEatStatusData != null) {
+                    // Delivers any previously loaded data immediately
+                    deliverResult(mEatStatusData);
+                } else {
+                    // Force a new load
+                    forceLoad();
+                }
+            }
+
+            // loadInBackground() performs asynchronous loading of data
+            @Override
+            public Cursor loadInBackground() {
+                // Will implement to load data
+                Uri EATSTATUS_URI = CONTENT_URI;
+                try{
+                    return getContentResolver ().query (EATSTATUS_URI,
+                            null,
+                            null,
+                            null,
+                            null);
+
+                }catch(Exception e){
+                    Log.e(TAG,"failed to asynchronously load data");
+                    e.printStackTrace ();
+                    return null;
+                }
+
+
+            }
+
+            // deliverResult sends the result of the load, a Cursor, to the registered listener
+            public void deliverResult(Cursor data) {
+                mEatStatusData = data;
+                super.deliverResult(mEatStatusData);
+            }
+        };
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor cursor) {
+        Log.v (TAG,"[onLoadFinished]--");
+        getDataFromCursor(cursor);
+
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
+
     }
 }
