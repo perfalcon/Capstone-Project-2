@@ -60,11 +60,11 @@ import butterknife.OnClick;
 
 import static com.falcon.balav.eatmonster.data.EatStatusContract.EatStatusEntry.CONTENT_URI;
 
-//import com.google.android.gms.analytics.HitBuilders;
-//import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 
-public class MainActivity extends AppCompatActivity        implements RewardedVideoAdListener, LoaderManager.LoaderCallbacks<Cursor> {
+public class MainActivity extends AppCompatActivity   implements RewardedVideoAdListener, LoaderManager.LoaderCallbacks<Cursor> {
     // Remove the below line after defining your own ad unit ID.
     private static final String TOAST_TEXT = "Test ads are being shown. "
             + "To show live ads, replace the ad unit ID in res/values/strings.xml with your own ad unit ID.";
@@ -101,9 +101,9 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
 
 
     /**
-     * The {@link //Tracker} used to record screen views.
+     * The {@link Tracker} used to record screen views.
      */
-  // private Tracker mTracker;
+    private Tracker mTracker;
     private static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
     private static final String APP_ID = "ca-app-pub-3940256099942544~3347511713";
     private RewardedVideoAd mRewardedVideoAd;
@@ -132,12 +132,12 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         loadRewardedVideoAd();
 
 
-      /*  // [START tracker]
+        // [START tracker]
         AnalyticsApplication application = (AnalyticsApplication) getApplication();
         mTracker = application.getDefaultTracker();
         // Enable Advertising Features.
         mTracker.enableAdvertisingIdCollection(true);
-        // [END tracker]*/
+        // [END tracker]
 
 
         originalBitmap =  ((BitmapDrawable)ivFood.getDrawable()).getBitmap();
@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
         getFoodItems (this);
         activateLoader();
        // getDataDatabase(this);
-        // addAnalyticsTracking("Main");
+         addAnalyticsTracking("Main");
     }
 
     private void saveDataDatabase( EatStatus mEatStatus){
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
 
         Uri uri = getContentResolver ().insert (EatStatusContract.EatStatusEntry.CONTENT_URI,contentValues);
         if(uri!=null){
-            Toast.makeText (getBaseContext (), "insertEatStatus--> EatStatus added to DB",Toast.LENGTH_LONG).show ();
+           // Toast.makeText (getBaseContext (), "insertEatStatus--> EatStatus added to DB",Toast.LENGTH_LONG).show ();
         }
 
         Log.v(TAG, "EatStatus-->"+mEatStatus.toString ());
@@ -408,7 +408,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
     }
     private void displaySettings(){
 
-       // addAnalyticsTracking("SettingsPopup");
+        addAnalyticsTracking("SettingsPopup");
         LayoutInflater layoutInflaterSettings = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View viewSettings = layoutInflaterSettings.inflate(R.layout.activity_settings,null);
 //        GradientDrawable drawable = (GradientDrawable) viewSettings.getResources().getDrawable(R.drawable.popup_border);
@@ -469,7 +469,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
     }
     private void displayOptions(){
 
-        //addAnalyticsTracking("OptionsPopup");
+        addAnalyticsTracking("OptionsPopup");
 
         LayoutInflater layoutInflaterOptions = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View viewOptions = layoutInflaterOptions.inflate(R.layout.activity_options,null);
@@ -485,7 +485,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
                 Log.v(TAG,"[onClick-50 coins clicked]:"+v.getId ());
                 showRewardedVideo();
                 coinsToAdd=50;
-                //addAnalyticsTrackingHit("50Coins");
+                addAnalyticsTrackingHit("50Coins");
             }
         });
         iv100Coins.setOnClickListener(new View.OnClickListener() {
@@ -494,7 +494,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
                 Log.v(TAG,"[onClick-100 coins clicked]:"+v.getId ());
                 showRewardedVideo();
                 coinsToAdd=100;
-               // addAnalyticsTrackingHit("100Coins");
+                addAnalyticsTrackingHit("100Coins");
             }
         });
         iv150Coins.setOnClickListener(new View.OnClickListener() {
@@ -503,12 +503,12 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
                 Log.v(TAG,"[onClick-150 coins clicked]:"+v.getId ());
                 showRewardedVideo();
                 coinsToAdd=150;
-               // addAnalyticsTrackingHit("150Coins");
+                addAnalyticsTrackingHit("150Coins");
             }
         });
     }
 
-/*    private void addAnalyticsTracking(String name){
+    private void addAnalyticsTracking(String name){
         Log.v(TAG, "Screen name: " + name);
         mTracker.setScreenName("EatMonster~" + name);
         mTracker.send(new HitBuilders.ScreenViewBuilder().build());
@@ -521,7 +521,7 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
                 .setAction(name)
                 .build());
         // [END custom_event]
-    }*/
+    }
     private void showRewardedVideo() {
        // showVideoButton.setVisibility(View.INVISIBLE);
         if (mRewardedVideoAd.isLoaded()) {
