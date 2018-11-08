@@ -82,8 +82,6 @@ public class MainActivity extends AppCompatActivity        implements RewardedVi
     boolean bDataStatus;
 
     int foodTapCounter=0;
-  //  int coins=0;
-   // int score=0;
     int coinsToAdd=50;
     boolean bOptionsScreen=false;
     boolean bSettingsScreen=false;
