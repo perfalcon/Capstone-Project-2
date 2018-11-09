@@ -27,6 +27,7 @@
     <string name="Level_3">Level 3</string>
     <string name="Level_4">Level 4</string>
     <string name="Level_5">Level 5</string>
+    <string name="NetworkConnectionError">Please check your Internet Connection.</string>
 
 
 

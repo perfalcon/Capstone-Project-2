@@ -43,6 +43,7 @@ import com.falcon.balav.eatmonster.model.Level;
 import com.falcon.balav.eatmonster.model.Settings;
 import com.falcon.balav.eatmonster.utils.FoodCut;
 import com.falcon.balav.eatmonster.utils.GsonUtils;
+import com.falcon.balav.eatmonster.utils.NetworkUtils;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
@@ -54,6 +55,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -140,31 +142,46 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
      * The {@link Tracker} used to record screen views.
      */
     private Tracker mTracker;
+
     private static final String AD_UNIT_ID = "ca-app-pub-3940256099942544/5224354917";
     private static final String APP_ID = "ca-app-pub-3940256099942544~3347511713";
     private RewardedVideoAd mRewardedVideoAd;
     Bitmap originalBitmap;
+    private static final String EATSTATUS_STATE="eatstatus";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate (savedInstanceState);
         setContentView (R.layout.activity_main);
 
+      if(savedInstanceState!=null){
+          if(savedInstanceState.containsKey(EATSTATUS_STATE)){
+              mEatSatus=savedInstanceState.getParcelable (EATSTATUS_STATE);
+              populateUI();
+          }
+      }else{
+          mEatSatus=new EatStatus ();
+          mSettings = new Settings ();
+          mLevel = new Level ();
+          mEatSatus.setSettings (new Settings ());
+          mEatSatus.setLevel (new Level ());
+      }
+
+
         // Create the client used to sign in to Google services.
         mGoogleSignInClient = GoogleSignIn.getClient(this,
                 new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
 
         ButterKnife.bind (this);
+
+
         // Load an ad into the AdMob banner view.
         AdView adView = (AdView) findViewById (R.id.adView);
         AdRequest adRequest = new AdRequest.Builder ()
                 .setRequestAgent ("android_studio:ad_template").build ();
         adView.loadAd (adRequest);
 
-        // Toasts the test ad message on the screen. Remove this after defining your own ad unit ID.
-        Toast.makeText (this, TOAST_TEXT, Toast.LENGTH_LONG).show ();
-
-        Log.v(TAG, "Before Ads");
         MobileAds.initialize(this, APP_ID);
 
         // Use an activity context to get the rewarded video instance.
@@ -180,18 +197,19 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
         mTracker.enableAdvertisingIdCollection(true);
         // [END tracker]
 
-
         originalBitmap =  ((BitmapDrawable)ivFood.getDrawable()).getBitmap();
 
-        mEatSatus=new EatStatus ();
-        mSettings = new Settings ();
-        mLevel = new Level ();
-        mEatSatus.setSettings (new Settings ());
-        mEatSatus.setLevel (new Level ());
         getFoodItems (this);
         activateLoader();
-       // getDataDatabase(this);
-         addAnalyticsTracking("Main");
+        addAnalyticsTracking("Main");
+    }
+
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState (outState);
+        outState.putParcelable (EATSTATUS_STATE,mEatSatus);
     }
 
     private void saveDataDatabase( EatStatus mEatStatus){
@@ -225,31 +243,6 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
 
         UpdateWidget();
        // HomeScreenWidgetService.startActionUpdateEatStatusWidgets (this);
-    }
-
-    private void getDataDatabase(Context mContext) {
-        Uri EATSTATUS_URI = CONTENT_URI;
-        Cursor cursor = mContext.getContentResolver ().query(
-                EATSTATUS_URI,
-                null,
-                null,
-                null,
-                null
-        );
-        if(cursor!=null){
-            Log.v (TAG, "count-->" + cursor.getCount ());
-            bDataStatus=true;
-            fillEatStatus(cursor);
-            populateUI ();
-        }else{
-            Log.v(TAG,"Opened for First Time");
-            bDataStatus=false;
-            populateDefaultUI();
-        }
-
-        if(cursor!=null){
-            cursor.close ();
-        }
     }
 
     private void getDataFromCursor(Cursor cursor){
@@ -328,9 +321,6 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
                 ivCurrentLevel.setImageResource (getImageID (mfoodItem.getFoodItem ()));
                 ivFood.setImageResource (getImageID(mfoodItem.getFoodItem ()));
 
-              /*  mEatSatus.setCoins (mEatSatus.getCoins ()-mfoodItem.getWeight ());//Reset the coin count to 0
-                String strTemp = getString (R.string.coinsDefaultText);
-                tvCoins.setText (strTemp);*/
                 //as weight matched --- then find the next level
                 for(FoodItems mfoodItemNextLevel:mFoodItems){
                     if(mEatSatus.getLevel ().getId ()<mfoodItemNextLevel.getLevel () ){
@@ -453,12 +443,9 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
         }
     }
     private void displaySettings(){
-
         addAnalyticsTracking("SettingsPopup");
         LayoutInflater layoutInflaterSettings = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View viewSettings = layoutInflaterSettings.inflate(R.layout.activity_settings,null);
-//        GradientDrawable drawable = (GradientDrawable) viewSettings.getResources().getDrawable(R.drawable.popup_border);
-//        viewSettings.setBackground(drawable);
         //instantiate popup window
         popupWindow = new PopupWindow (viewSettings, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         //display the popup window
@@ -469,7 +456,6 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
             spinner.setOnItemSelectedListener (new AdapterView.OnItemSelectedListener () {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                   // Toast.makeText (MainActivity.this,adapterView.getSelectedItem ().toString (),Toast.LENGTH_LONG).show ();
                     UpdateColors(adapterView.getSelectedItem ().toString ());
                 }
 
@@ -483,12 +469,17 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
         mSaveSwitch.setChecked (mEatSatus.getSettings ().isSaveSettings ());
         mSaveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    Log.d(TAG, "Sign-in button clicked");
-                    startSignInIntent();
+                if(NetworkUtils.isConnected (MainActivity.this)){
+                    if(isChecked){
+                        Log.d(TAG, "Sign-in button clicked");
+                        startSignInIntent();
+                    }else{
+                        Log.d(TAG, "Sign-out button clicked");
+                        signOut();
+                    }
                 }else{
-                    Log.d(TAG, "Sign-out button clicked");
-                    signOut();
+                    Log.d(TAG,"No Network Connections");
+                    Toast.makeText (MainActivity.this,getString(R.string.NetworkConnectionError),Toast.LENGTH_LONG).show ();
                 }
                 mEatSatus.getSettings ().setSaveSettings (isChecked);
                 bDataStatus=isChecked;
@@ -723,6 +714,11 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
     //Game Play Services
 
     public void updateGamePlayServices(int score, int coins){
+        if(!NetworkUtils.isConnected (this)){
+            Log.d(TAG,"No Network Connections");
+           // Toast.makeText (this,getString(R.string.NetworkConnectionError),Toast.LENGTH_LONG).show ();
+            return;
+        }
         Log.v(TAG,"[updateGamePlayServices]--called");
         checkForAchievements (score,coins);
         // push those accomplishments to the cloud, if signed in
@@ -762,7 +758,7 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
             Log.v(TAG,"[checkForAchievements]--Level Changed");
             int resId=getResources ().getIdentifier ("string/"+"Level_"+String.valueOf (mEatSatus.getLevel ().getId ()),"string",getPackageName ());
             Log.v (TAG,"[checkForAchievements]resId-->"+resId);
-            achievementToast (getString (resId));
+          //  achievementToast (getString (resId));
             bLevelChanged=false;
             switch(mEatSatus.getLevel ().getId ()){
                 case 1:
@@ -821,6 +817,11 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
     }
     private void signInSilently() {
         Log.d(TAG, "signInSilently()");
+    if(!NetworkUtils.isConnected (this)){
+            Log.d(TAG,"No Network Connections");
+            Toast.makeText (this,getString(R.string.NetworkConnectionError),Toast.LENGTH_LONG).show ();
+            return;
+        }
 
         mGoogleSignInClient.silentSignIn().addOnCompleteListener(this,
                 new OnCompleteListener<GoogleSignInAccount> () {
@@ -842,10 +843,7 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume()");
-
-        // Since the state of the signed in user can change when the activity is not active
-        // it is recommended to try and sign in silently from when the app resumes.
+        activateLoader();
         signInSilently();
     }
     private void signOut() {
