@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <!--
+    Google Play game services IDs.
+    Save this file as res/values/games-ids.xml in your project.
+    -->
+<resources>
+    <!-- app_id -->
+    <string name="app_id" translatable="false">283156356998</string>
+    <!-- package_name -->
+    <string name="package_name" translatable="false">com.falcon.balav.eatmonster</string>
+    <!-- achievement prime -->
+    <string name="achievement_prime" translatable="false">CgkIhr-8654IEAIQAw</string>
+    <!-- achievement Reached Level 2 -->
+    <string name="achievement_reached_level_2" translatable="false">CgkIhr-8654IEAIQAg</string>
+    <!-- achievement Reached Level 1 -->
+    <string name="achievement_reached_level_1" translatable="false">CgkIhr-8654IEAIQBw</string>
+    <!-- achievement Reached Level 3 -->
+    <string name="achievement_reached_level_3" translatable="false">CgkIhr-8654IEAIQBA</string>
+    <!-- achievement Reached Level 4 -->
+    <string name="achievement_reached_level_4" translatable="false">CgkIhr-8654IEAIQBQ</string>
+    <!-- achievement Reached Level 5 -->
+    <string name="achievement_reached_level_5" translatable="false">CgkIhr-8654IEAIQBg</string>
+</resources>
