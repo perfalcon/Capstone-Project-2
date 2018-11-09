@@ -91,6 +91,10 @@ public class HomeScreenWidgetProvider extends AppWidgetProvider {
             views.setImageViewResource (R.id.imageView,context.getResources ()
                     .getIdentifier ("drawable/"+image.substring (0,image.lastIndexOf ('.')),"drawable",context.getPackageName ()));
         }
+        if(cursor!=null){
+            cursor.close ();
+        }
+
     }
 
     @Override

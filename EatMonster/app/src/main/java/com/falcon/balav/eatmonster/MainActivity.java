@@ -1,9 +1,11 @@
 package com.falcon.balav.eatmonster;
 
+import android.app.AlertDialog;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -62,6 +64,24 @@ import static com.falcon.balav.eatmonster.data.EatStatusContract.EatStatusEntry.
 
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.games.AchievementsClient;
+import com.google.android.gms.games.AnnotatedData;
+import com.google.android.gms.games.EventsClient;
+import com.google.android.gms.games.Games;
+import com.google.android.gms.games.LeaderboardsClient;
+import com.google.android.gms.games.Player;
+import com.google.android.gms.games.PlayersClient;
+import com.google.android.gms.games.event.Event;
+import com.google.android.gms.games.event.EventBuffer;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 
 public class MainActivity extends AppCompatActivity   implements RewardedVideoAdListener, LoaderManager.LoaderCallbacks<Cursor> {
@@ -71,6 +91,21 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
     private static final String TAG = MainActivity.class.toString();
 
     private static final int EATSTATUS_LOADER_ID = 0;
+    // request codes we use when invoking an external activity
+    private static final int RC_UNUSED = 5001;
+    private static final int RC_SIGN_IN = 9001;
+
+
+    // Client used to sign in with Google APIs
+    private GoogleSignInClient mGoogleSignInClient;
+    // Client variables
+    private AchievementsClient mAchievementsClient;
+    private LeaderboardsClient mLeaderboardsClient;
+    private EventsClient mEventsClient;
+    private PlayersClient mPlayersClient;
+    // achievements and scores we're pending to push to the cloud
+    // (waiting for the user to sign in, for instance)
+   private final AccomplishmentsOutbox mOutbox = new AccomplishmentsOutbox();
 
     @BindView (R.id.tvCoins)    TextView tvCoins;
     @BindView (R.id.tvScore) TextView tvScore;
@@ -92,6 +127,7 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
     int coinsToAdd=50;
     boolean bOptionsScreen=false;
     boolean bSettingsScreen=false;
+    boolean bLevelChanged=false;
 
 
     EatStatus mEatSatus;
@@ -113,6 +149,11 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate (savedInstanceState);
         setContentView (R.layout.activity_main);
+
+        // Create the client used to sign in to Google services.
+        mGoogleSignInClient = GoogleSignIn.getClient(this,
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
+
         ButterKnife.bind (this);
         // Load an ad into the AdMob banner view.
         AdView adView = (AdView) findViewById (R.id.adView);
@@ -157,6 +198,7 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
         if(!bDataStatus) return;
         deleteEatStatus ();//delete the current record and add a record with new details ... ( have to remove after the update query is done)
         insertEatStatus (mEatStatus);
+        updateGamePlayServices(mEatStatus.getScore (),mEatStatus.getCoins ());
     }
     private void deleteEatStatus() {
         Uri uri = EatStatusContract.EatStatusEntry.CONTENT_URI;
@@ -185,7 +227,6 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
        // HomeScreenWidgetService.startActionUpdateEatStatusWidgets (this);
     }
 
-
     private void getDataDatabase(Context mContext) {
         Uri EATSTATUS_URI = CONTENT_URI;
         Cursor cursor = mContext.getContentResolver ().query(
@@ -204,6 +245,10 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
             Log.v(TAG,"Opened for First Time");
             bDataStatus=false;
             populateDefaultUI();
+        }
+
+        if(cursor!=null){
+            cursor.close ();
         }
     }
 
@@ -277,6 +322,7 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
         for (FoodItems mfoodItem : mFoodItems) {
             if(mEatSatus.getCoins ()<mfoodItem.getWeight ()){
                 Log.v(TAG,"[checkAndUpdateLevel]--> Weight matched");
+                bLevelChanged=true;
                 mEatSatus.getLevel ().setLevel (mfoodItem.getLevel ());
                 mEatSatus.getLevel ().setFoodItem (mfoodItem.getFoodItem ());
                 ivCurrentLevel.setImageResource (getImageID (mfoodItem.getFoodItem ()));
@@ -437,6 +483,13 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
         mSaveSwitch.setChecked (mEatSatus.getSettings ().isSaveSettings ());
         mSaveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    Log.d(TAG, "Sign-in button clicked");
+                    startSignInIntent();
+                }else{
+                    Log.d(TAG, "Sign-out button clicked");
+                    signOut();
+                }
                 mEatSatus.getSettings ().setSaveSettings (isChecked);
                 bDataStatus=isChecked;
                 saveDataDatabase (mEatSatus);
@@ -665,5 +718,275 @@ public class MainActivity extends AppCompatActivity   implements RewardedVideoAd
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
 
+    }
+
+    //Game Play Services
+
+    public void updateGamePlayServices(int score, int coins){
+        Log.v(TAG,"[updateGamePlayServices]--called");
+        checkForAchievements (score,coins);
+        // push those accomplishments to the cloud, if signed in
+        pushAccomplishments();
+
+
+    }
+
+    // Checks if n is prime. We don't consider 0 and 1 to be prime.
+    private boolean isPrime(int n) {
+        int i;
+        if (n == 0 || n == 1) {
+            return false;
+        }
+        for (i = 2; i <= n / 2; i++) {
+            if (n % i == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+    /**
+     * Check for achievements and unlock the appropriate ones.
+     *
+     * @param score the score the user got.
+     * @param coins the coins the user got.
+     */
+    private void checkForAchievements(int score, int coins) {
+        Log.v(TAG,"[checkForAchievements]--called");
+        // Check if each condition is met; if so, unlock the corresponding
+        // achievement.
+        if (isPrime(score)) {
+            mOutbox.mPrimeAchievement = true;
+            achievementToast(getString(R.string.achievement_prime_toast_text));
+        }
+        if(bLevelChanged){
+            Log.v(TAG,"[checkForAchievements]--Level Changed");
+            int resId=getResources ().getIdentifier ("string/"+"Level_"+String.valueOf (mEatSatus.getLevel ().getId ()),"string",getPackageName ());
+            Log.v (TAG,"[checkForAchievements]resId-->"+resId);
+            achievementToast (getString (resId));
+            bLevelChanged=false;
+            switch(mEatSatus.getLevel ().getId ()){
+                case 1:
+                    mOutbox.mLevel1Achievement=true; break;
+                case 2:
+                    mOutbox.mLevel2Achievement=true; break;
+                case 3:
+                    mOutbox.mLevel3Achievement=true; break;
+                case 4:
+                    mOutbox.mLevel4Achievement=true; break;
+                case 5:
+                    mOutbox.mLevel5Achievement=true; break;
+            }
+        }
+        mOutbox.mBoredSteps++;
+    }
+
+    private void achievementToast(String achievement) {
+        // Only show toast if not signed in. If signed in, the standard Google Play
+        // toasts will appear, so we don't need to show our own.
+        if (!isSignedIn()) {
+            Toast.makeText(this, getString(R.string.achievement) + ": " + achievement,
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void pushAccomplishments() {
+        Log.v(TAG,"[pushAccomplishments]--called");
+        if (!isSignedIn()) {
+            // can't push to the cloud, try again later
+            return;
+        }
+        if (mOutbox.mPrimeAchievement) {
+            mAchievementsClient.unlock(getString(R.string.achievement_prime));
+            mOutbox.mPrimeAchievement = false;
+        }
+        if(mOutbox.mLevel1Achievement){
+            mAchievementsClient.unlock (getString(R.string.achievement_reached_level_1));
+        }
+        if(mOutbox.mLevel2Achievement){
+            mAchievementsClient.unlock (getString(R.string.achievement_reached_level_2));
+        }
+        if(mOutbox.mLevel3Achievement){
+            mAchievementsClient.unlock (getString(R.string.achievement_reached_level_3));
+        }
+        if(mOutbox.mLevel4Achievement){
+            mAchievementsClient.unlock (getString(R.string.achievement_reached_level_4));
+        }
+        if(mOutbox.mLevel5Achievement){
+            mAchievementsClient.unlock (getString(R.string.achievement_reached_level_5));
+        }
+
+    }
+    private boolean isSignedIn() {
+        return GoogleSignIn.getLastSignedInAccount(this) != null;
+    }
+    private void signInSilently() {
+        Log.d(TAG, "signInSilently()");
+
+        mGoogleSignInClient.silentSignIn().addOnCompleteListener(this,
+                new OnCompleteListener<GoogleSignInAccount> () {
+                    @Override
+                    public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "signInSilently(): success");
+                            onConnected(task.getResult());
+                        } else {
+                            Log.d(TAG, "signInSilently(): failure", task.getException());
+                            onDisconnected();
+                        }
+                    }
+                });
+    }
+    private void startSignInIntent() {
+        startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume()");
+
+        // Since the state of the signed in user can change when the activity is not active
+        // it is recommended to try and sign in silently from when the app resumes.
+        signInSilently();
+    }
+    private void signOut() {
+        Log.d(TAG, "signOut()");
+
+        if (!isSignedIn()) {
+            Log.w(TAG, "signOut() called, but was not signed in!");
+            return;
+        }
+
+        mGoogleSignInClient.signOut().addOnCompleteListener(this,
+                new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        boolean successful = task.isSuccessful();
+                        Log.d(TAG, "signOut(): " + (successful ? "success" : "failed"));
+
+                        onDisconnected();
+                    }
+                });
+    }
+
+    public void onShowAchievementsRequested() {
+        mAchievementsClient.getAchievementsIntent()
+                .addOnSuccessListener(new OnSuccessListener<Intent> () {
+                    @Override
+                    public void onSuccess(Intent intent) {
+                        startActivityForResult(intent, RC_UNUSED);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener () {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        handleException(e, getString(R.string.achievements_exception));
+                    }
+                });
+    }
+    private void handleException(Exception e, String details) {
+        int status = 0;
+
+        if (e instanceof ApiException) {
+            ApiException apiException = (ApiException) e;
+            status = apiException.getStatusCode();
+        }
+
+        String message = getString(R.string.status_exception_error, details, status, e);
+
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage(message)
+                .setNeutralButton(android.R.string.ok, null)
+                .show();
+    }
+
+
+    private void onConnected(GoogleSignInAccount googleSignInAccount) {
+        Log.d(TAG, "onConnected(): connected to Google APIs");
+
+        mAchievementsClient = Games.getAchievementsClient(this, googleSignInAccount);
+        mLeaderboardsClient = Games.getLeaderboardsClient(this, googleSignInAccount);
+        mEventsClient = Games.getEventsClient(this, googleSignInAccount);
+        mPlayersClient = Games.getPlayersClient(this, googleSignInAccount);
+
+
+        // Set the greeting appropriately on main menu
+        mPlayersClient.getCurrentPlayer()
+                .addOnCompleteListener(new OnCompleteListener<Player>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Player> task) {
+                        String displayName;
+                        if (task.isSuccessful()) {
+                            displayName = task.getResult().getDisplayName();
+                        } else {
+                            Exception e = task.getException();
+                            handleException(e, getString(R.string.players_exception));
+                            displayName = "???";
+                        }
+                        //mMainMenuFragment.setGreeting("Hello, " + displayName);
+                    }
+                });
+
+
+        // if we have accomplishments to push, push them
+        if (!mOutbox.isEmpty()) {
+            pushAccomplishments();
+            Toast.makeText(this, getString(R.string.your_progress_will_be_uploaded),
+                    Toast.LENGTH_LONG).show();
+        }
+
+        loadAndPrintEvents();
+    }
+    private void onDisconnected() {
+        Log.d(TAG, "onDisconnected()");
+        mAchievementsClient = null;
+        mLeaderboardsClient = null;
+        mPlayersClient = null;
+    }
+
+    private class AccomplishmentsOutbox {
+        boolean mPrimeAchievement = false;
+        boolean mLevel1Achievement=false;
+        boolean mLevel2Achievement=false;
+        boolean mLevel3Achievement=false;
+        boolean mLevel4Achievement=false;
+        boolean mLevel5Achievement=false;
+
+        int mBoredSteps = 0;
+        boolean isEmpty() {
+            return !mPrimeAchievement && !mLevel1Achievement && !mLevel2Achievement && !mLevel3Achievement
+            && !mLevel4Achievement && !mLevel5Achievement && mBoredSteps == 0 ;
+        }
+    }
+
+    private void loadAndPrintEvents() {
+        final MainActivity mainActivity = this;
+        mEventsClient.load(true)
+                .addOnSuccessListener(new OnSuccessListener<AnnotatedData<EventBuffer>>() {
+                    @Override
+                    public void onSuccess(AnnotatedData<EventBuffer> eventBufferAnnotatedData) {
+                        EventBuffer eventBuffer = eventBufferAnnotatedData.get();
+
+                        int count = 0;
+                        if (eventBuffer != null) {
+                            count = eventBuffer.getCount();
+                        }
+
+                        Log.i(TAG, "number of events: " + count);
+
+                        for (int i = 0; i < count; i++) {
+                            Event event = eventBuffer.get(i);
+                            Log.i(TAG, "event: "
+                                    + event.getName()
+                                    + " -> "
+                                    + event.getValue());
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        handleException(e, getString(R.string.achievements_exception));
+                    }
+                });
     }
 }

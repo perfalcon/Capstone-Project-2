@@ -16,6 +16,18 @@
     <string name="coinsLabelText">Coins: </string>
     <string name="scoreLabelText">Score: </string>
     <string name="paidVersionText">Available in Paid Version"</string>
+    <string name="achievement">Achievement</string>
+    <string name="achievement_prime_toast_text">Prime score!</string>
+    <string name="players_exception">There was an issue communicating with players.</string>
+    <string name="status_exception_error">%1$s (status %2$d). %3$s.</string>
+    <string name="achievements_exception">There was an issue communicating with achievements.</string>
+    <string name="your_progress_will_be_uploaded">Your existing achievements and score will be uploaded shortly.</string>
+    <string name="Level_1">Level 1</string>
+    <string name="Level_2">Level 2</string>
+    <string name="Level_3">Level 3</string>
+    <string name="Level_4">Level 4</string>
+    <string name="Level_5">Level 5</string>
+
 
 
 </resources>
